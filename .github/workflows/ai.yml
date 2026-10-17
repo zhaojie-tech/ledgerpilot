@@ -22,5 +22,15 @@ jobs:
           docker run --rm -v "$PWD/../../apps/ai":/srv -w /srv python:3.11-slim bash -c '
             pip install --no-cache-dir -q -r requirements.txt &&
             uvicorn app.main:app --host 127.0.0.1 --port 8000 >/tmp/u.log 2>&1 &
-            for i in $(seq 1 60); do curl -sf http://127.0.0.1:8000/api/v1/ping && exit 0; sleep 2; done
-            tail -50 /tmp/u.log; exit 1'
+            python - <<"PYEOF"
+          import sys, time, urllib.request
+          for _ in range(90):
+              try:
+                  with urllib.request.urlopen("http://127.0.0.1:8000/api/v1/ping", timeout=2) as r:
+                      print("PING OK", r.status)
+                      sys.exit(0)
+              except Exception:
+                  time.sleep(2)
+          print(open("/tmp/u.log").read()[-3000:])
+          sys.exit(1)
+          PYEOF'
