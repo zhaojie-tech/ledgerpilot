@@ -1,0 +1,148 @@
+[
+ {
+  "name": "C01_简单收款",
+  "input": "收到张三商贸货款10000元，银行转账",
+  "llm_response": "{\"voucher_date\":\"2026-06-12\",\"items\":[{\"biz_type\":\"RECEIVE\",\"summary\":\"收张三商贸货款\",\"contact_name\":\"张三商贸\",\"payment_method\":\"银行转账\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行存款\",\"amount\":10000,\"summary\":\"收款\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1122\",\"subject_name\":\"应收账款\",\"amount\":10000,\"summary\":\"收款\",\"aux\":{\"customer\":\"张三商贸\"}}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "amount_strings": [
+    "10000.00"
+   ],
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C02_办公用品费用",
+  "input": "办公室买打印机3500元，银行转账",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"EXPENSE\",\"summary\":\"购打印机\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1601\",\"subject_name\":\"固定资产\",\"amount\":3500,\"summary\":\"购打印机\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行存款\",\"amount\":3500,\"summary\":\"购打印机\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C03_含税采购轧差",
+  "input": "采购办公用品5000元含税已入库未付款",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"PURCHASE\",\"summary\":\"采购办公用品\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1405\",\"subject_name\":\"库存商品\",\"amount\":4424.78,\"summary\":\"采购\"},{\"direction\":\"DEBIT\",\"subject_code\":\"2221\",\"subject_name\":\"应交税费-进项\",\"amount\":575.22,\"summary\":\"进项\"},{\"direction\":\"CREDIT\",\"subject_code\":\"2202\",\"subject_name\":\"应付账款\",\"amount\":5000,\"summary\":\"采购\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "amount_strings": [
+    "4424.78",
+    "575.22",
+    "5000.00"
+   ],
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C04_工资代扣",
+  "input": "发放本月工资50万，银行转账，代扣个税和社保公积金",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"PAY\",\"summary\":\"发放工资\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"2211\",\"subject_name\":\"应付职工薪酬-工资\",\"amount\":500000,\"summary\":\"应付工资\"},{\"direction\":\"CREDIT\",\"subject_code\":\"2221\",\"subject_name\":\"应交税费-个税\",\"amount\":40000,\"summary\":\"代扣个税\"},{\"direction\":\"CREDIT\",\"subject_code\":\"2241\",\"subject_name\":\"其他应付款-社保\",\"amount\":40000,\"summary\":\"代扣社保\"},{\"direction\":\"CREDIT\",\"subject_code\":\"2241\",\"subject_name\":\"其他应付款-公积金\",\"amount\":60000,\"summary\":\"代扣公积金\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行存款\",\"amount\":360000,\"summary\":\"实发\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "subject_codes_contains": [
+    "2211",
+    "2241"
+   ],
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C05_红字冲销",
+  "input": "冲销上月多记的销售收入2000元",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"SALE\",\"summary\":\"红字冲销\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营业务收入\",\"amount\":-2000,\"summary\":\"红字冲销\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1122\",\"subject_name\":\"应收账款\",\"amount\":-2000,\"summary\":\"红字冲销\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "amount_strings": [
+    "-2000.00"
+   ],
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C06_多业务拆分",
+  "input": "收到王五货款50000元到账，同时付房租8000元现金",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"RECEIVE\",\"summary\":\"收王五货款\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行存款\",\"amount\":50000,\"summary\":\"收款\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1122\",\"subject_name\":\"应收账款\",\"amount\":50000,\"summary\":\"收款\"}]},{\"biz_type\":\"EXPENSE\",\"summary\":\"付房租\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"6603\",\"subject_name\":\"管理费用\",\"amount\":8000,\"summary\":\"房租\"},{\"direction\":\"CREDIT\",\"subject_code\":\"1001\",\"subject_name\":\"库存现金\",\"amount\":8000,\"summary\":\"房租\"}]}]}",
+  "expect": {
+   "items": 2,
+   "balanced": true,
+   "level": "HIGH",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C07_不平衡负例",
+  "input": "记一笔不平衡的账",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"OTHER\",\"summary\":\"bad\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行存款\",\"amount\":100,\"summary\":\"x\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":90,\"summary\":\"x\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": false,
+   "level": "FAIL",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C08_金额缺失负例",
+  "input": "金额缺失的账",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"OTHER\",\"summary\":\"missing\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行\",\"amount\":null,\"summary\":\"x\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":100,\"summary\":\"x\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": false,
+   "level": "FAIL",
+   "has_error_code": "AMOUNT_MISSING",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C09_科目编码异常",
+  "input": "科目编码太短的账",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"OTHER\",\"summary\":\"s\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"10\",\"subject_name\":\"银行\",\"amount\":100,\"summary\":\"x\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":100,\"summary\":\"x\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "MEDIUM",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C10_零金额警示",
+  "input": "零金额账",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"OTHER\",\"summary\":\"zero\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行\",\"amount\":0,\"summary\":\"x\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":0,\"summary\":\"x\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "LOW",
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C11_LLM坏JSON",
+  "input": "天书输入",
+  "llm_response": "这不是JSON",
+  "expect": {
+   "pipeline_error": true,
+   "schema_version": 2
+  }
+ },
+ {
+  "name": "C12_红字平衡混蓝字",
+  "input": "红字与蓝字混合",
+  "llm_response": "{\"voucher_date\":null,\"items\":[{\"biz_type\":\"SALE\",\"summary\":\"mix\",\"entries\":[{\"direction\":\"DEBIT\",\"subject_code\":\"1122\",\"subject_name\":\"应收\",\"amount\":-500,\"summary\":\"红\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":-500,\"summary\":\"红\"},{\"direction\":\"DEBIT\",\"subject_code\":\"1002\",\"subject_name\":\"银行\",\"amount\":300,\"summary\":\"蓝\"},{\"direction\":\"CREDIT\",\"subject_code\":\"6001\",\"subject_name\":\"主营\",\"amount\":300,\"summary\":\"蓝\"}]}]}",
+  "expect": {
+   "items": 1,
+   "balanced": true,
+   "level": "HIGH",
+   "schema_version": 2
+  }
+ }
+]

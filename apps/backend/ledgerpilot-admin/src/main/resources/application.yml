@@ -1,0 +1,111 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: ledgerpilot-admin
+
+  # 数据源配置（阿里云RDS MySQL）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ledgerpilot?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      filter:
+        stat:
+          enabled: false
+
+  # Redis配置（阿里云Redis）
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: 6379
+    database: 0
+    timeout: 5000
+    password: ${SPRING_REDIS_PASSWORD:}
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-bigdecimal-as-plain: true
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.ledgerpilot.**.entity
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# JWT配置（secret 必须 env 注入：JWT_SECRET，≥32 字符；历史公开默认串一律禁止）
+jwt:
+  secret: ${JWT_SECRET:}
+  expiration: 604800000  # 7天（毫秒）
+
+# 测试模式（默认关闭；认证与租户上下文由 AuthenticationFilter 保证）
+auth:
+  test-mode: false
+  test-tenant-id: 1
+
+# 服务间内部共享密钥（AI 解析服务回调 /api/rateconfig/internal/* 用；未配置 = 内部端点禁用）
+ledgerpilot:
+  internal-token: ${LEDGERPILOT_INTERNAL_TOKEN:}
+
+# Actuator监控端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+# AI 服务配置（Python FastAPI；token 与 apps/ai 的 AI 服务 共用变量名 LEDGERPILOT_API_TOKEN）
+ai-service:
+  base-url: ${AI_SERVICE_BASE_URL:http://localhost:8000}
+  timeout-ms: ${AI_SERVICE_TIMEOUT_MS:15000}
+  token: ${LEDGERPILOT_API_TOKEN:}
+
+# 日志配置
+logging:
+  level:
+    com.ledgerpilot: INFO
+    com.baomidou.mybatisplus: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

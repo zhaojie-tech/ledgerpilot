@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- 国内网络镜像配置：mvn -s settings-mirror.xml ... -->
+<settings>
+  <mirrors>
+    <mirror>
+      <id>aliyunmaven</id>
+      <mirrorOf>central</mirrorOf>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>

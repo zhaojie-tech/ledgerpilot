@@ -1,0 +1,16 @@
+name: front
+on:
+  push: {branches: [main], paths: ["apps/front/**", ".github/workflows/front.yml"]}
+  pull_request: {paths: ["apps/front/**", ".github/workflows/front.yml"]}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: apps/front}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - uses: pnpm/action-setup@v4
+        with: {version: 9}
+      - run: pnpm install --frozen-lockfile --registry=https://registry.npmmirror.com
+      - run: pnpm build   # 含 vue-tsc 类型检查

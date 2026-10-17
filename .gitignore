@@ -1,0 +1,8 @@
+# 各 app 自带 .gitignore 继续生效；根级只管仓库级产物
+*.log
+.env
+.env.local
+deploy/.env
+# 本地检查/演示产物
+.idea/
+.vscode/

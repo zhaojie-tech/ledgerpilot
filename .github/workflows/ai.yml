@@ -1,0 +1,26 @@
+name: ai
+on:
+  push: {branches: [main], paths: ["apps/ai/**", ".github/workflows/ai.yml"]}
+  pull_request: {paths: ["apps/ai/**", ".github/workflows/ai.yml"]}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: apps/ai}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check app/ tests/
+      - run: coverage run -m pytest
+      - name: 覆盖率门（core+llm ≥80%，整体 ≥75%）
+        run: |
+          coverage report --include="app/core/*,app/llm/*" --fail-under=80
+          coverage report --fail-under=75
+      - name: 干净容器安装冒烟
+        run: |
+          docker run --rm -v "$PWD/../../apps/ai":/srv -w /srv python:3.11-slim bash -c '
+            pip install --no-cache-dir -q -r requirements.txt &&
+            uvicorn app.main:app --host 127.0.0.1 --port 8000 >/tmp/u.log 2>&1 &
+            for i in $(seq 1 60); do curl -sf http://127.0.0.1:8000/api/v1/ping && exit 0; sleep 2; done
+            tail -50 /tmp/u.log; exit 1'

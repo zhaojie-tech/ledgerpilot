@@ -1,0 +1,25 @@
+# LedgerPilot 前端生产部署模板（envsubst 渲染 ${BACKEND_UPSTREAM} / ${AI_UPSTREAM} / ${AI_SERVICE_TOKEN}）
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA history 路由回退
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 后端 API（同源反代，避免 CORS）
+    location /api/ {
+        proxy_pass ${BACKEND_UPSTREAM};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # AI 服务（服务端注入 X-API-Token；token 不进浏览器）
+    location /ai-api/ {
+        proxy_pass ${AI_UPSTREAM}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-API-Token ${AI_SERVICE_TOKEN};
+    }
+}

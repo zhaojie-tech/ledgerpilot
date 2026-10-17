@@ -1,0 +1,39 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.log
+
+# Environment（.env.example 是模板，不入忽略）
+.env
+.env.local
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data（chroma 持久化与本地知识库，均不入仓）
+data/
+knowledge/

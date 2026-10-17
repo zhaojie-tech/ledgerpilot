@@ -1,0 +1,11 @@
+# gitleaks 配置：沿用默认规则 + 锁文件/测试语料的误报豁免
+[extend]
+useDefault = true
+
+[[allowlist]]
+description = "前端锁文件的完整性哈希（sha512 高熵误报）"
+paths = ['''(^|/)pnpm-lock\.yaml$''']
+
+[[allowlist]]
+description = "演示/测试数据中的占位符与示例密钥形态"
+regexes = ['''change-me(-demo-only-32-chars-minimum)?''', '''all-in-one-demo''', '''\$2b\$10\$[A-Za-z0-9./]{53}''']

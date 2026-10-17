@@ -1,0 +1,19 @@
+name: deploy
+on:
+  push: {branches: [main], paths: ["deploy/**", "apps/**", ".github/workflows/deploy.yml"]}
+  pull_request: {paths: ["deploy/**", ".github/workflows/deploy.yml"]}
+jobs:
+  all-in-one-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: all-in-one 镜像可构建性（不推送）
+        run: docker build -f deploy/all-in-one/Dockerfile -t ledgerpilot/all-in-one-smoke .
+  compose-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: compose 配置校验（env 齐全性）
+        run: |
+          printf 'JWT_SECRET=ci-smoke-secret-0123456789-abcdef\nMYSQL_ROOT_PASSWORD=ci\nLEDGERPILOT_API_TOKEN=ci\n' > deploy/.env
+          docker compose -f deploy/docker-compose.yml --env-file deploy/.env config >/dev/null && echo "compose config OK"
